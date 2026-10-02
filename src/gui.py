@@ -355,12 +355,18 @@ class ModernDisplayCommanderApp(ctk.CTk):
         self.c_slider.set(75); self.c_val_lbl.configure(text="75")
         self.s_slider.set(50); self.s_val_lbl.configure(text="50")
         self.bl_slider.set(50); self.bl_val_lbl.configure(text="50")
+        self.color_preset_combo.set("Standard (Neutral)")
+        self.r_slider.set(50); self.r_val_lbl.configure(text="50")
+        self.g_slider.set(50); self.g_val_lbl.configure(text="50")
+        self.b_gain_slider.set(48); self.bg_val_lbl.configure(text="48")
 
     def _run_standard(self):
         self.ctl.set_brightness(70)
         self.ctl.set_contrast(75)
         self.ctl.set_sharpness(50)
         self.ctl.set_black_level(50)
+        self.ctl.set_color_temp_preset(5)
+        self.ctl.set_rgb_gains(50, 50, 48)
         self.ctl.set_smart_mode(0)
 
     def _apply_eco(self):
@@ -403,12 +409,24 @@ class ModernDisplayCommanderApp(ctk.CTk):
 
     def _apply_low_blue(self):
         threading.Thread(target=self._run_low_blue, daemon=True).start()
-        self.b_slider.set(60); self.b_val_lbl.configure(text="60")
-        self.c_slider.set(80); self.c_val_lbl.configure(text="80")
+        self.b_slider.set(50); self.b_val_lbl.configure(text="50")
+        self.c_slider.set(70); self.c_val_lbl.configure(text="70")
+        self.color_preset_combo.set("Warm")
+        self.r_slider.set(50); self.r_val_lbl.configure(text="50")
+        self.g_slider.set(48); self.g_val_lbl.configure(text="48")
+        self.b_gain_slider.set(30); self.bg_val_lbl.configure(text="30")
 
     def _run_low_blue(self):
-        self.ctl.set_brightness(60)
-        self.ctl.set_contrast(80)
+        # Hardware Low Blue Light activation:
+        # 1. Engage MCCS Low Blue Mode (0xDC = 5)
+        self.ctl.set_smart_mode(5)
+        # 2. Engage Warm color matrix (0x14 = 8)
+        self.ctl.set_color_temp_preset(8)
+        # 3. Soften brightness to 50 & contrast to 70 for eye strain relief
+        self.ctl.set_brightness(50)
+        self.ctl.set_contrast(70)
+        # 4. Physically cut Blue channel gain down to 30
+        self.ctl.set_rgb_gains(50, 48, 30)
 
     def _switch_input(self, val, label):
         self.ctl.switch_input(val)
